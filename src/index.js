@@ -1,3 +1,5 @@
+/* eslint-disable */
+
 /**
  * 自定义 jsx
  */
@@ -89,7 +91,8 @@ function updateElement($parent, newNode, oldNode, index = 0) {
 function changed(node1, node2) {
 	return typeof node1 !== typeof node2 ||
 		   typeof node1 === 'string' && node1 !== node2 ||
-		   node1.type !== node2.type;
+		   node1.type !== node2.type ||
+		   node1.props && node1.props.forceUpdate;
 }
 
 
@@ -144,7 +147,7 @@ function setProp($target, name, value) {
  * @return {Boolean}      [description]
  */
 function isCustomProp(name){
-	isEventProp(name);
+	return isEventProp(name) || name === 'forceUpdate';
 }
 
 /**
@@ -242,25 +245,55 @@ function addEventListeners($target, props) {
 	});
 }
 
+// const f = (
+// 	<ul style="list-style: none;">
+// 		<li className="item">item 1</li>
+// 		<li className="item">
+// 			<input type="checkbox" checked={true} />
+// 			<input type="text" disabled={false} />
+// 		</li>
+// 	</ul>
+// );
+
+// const g = (
+//   <ul style="list-style: none;">
+//     <li className="item item2">item 1</li>
+//     <li style="background: red;">
+//       <input type="checkbox" checked={false} />
+//       <input type="text" disabled={true} />
+//     </li>
+//   </ul>
+// );
+
+
+function log(e) {
+  console.log(e.target.value);
+}
+
 const f = (
 	<ul style="list-style: none;">
-		<li className="item">item 1</li>
+		<li className="item" onClick={() => alert('hi!')}>item 1</li>
 		<li className="item">
 			<input type="checkbox" checked={true} />
-			<input type="text" disabled={false} />
+			<input type="text" onInput={log} />
 		</li>
+		{/* this node will always be updated */}
+		<li forceUpdate={true}>text</li>
 	</ul>
 );
 
 const g = (
-  <ul style="list-style: none;">
-    <li className="item item2">item 1</li>
-    <li style="background: red;">
-      <input type="checkbox" checked={false} />
-      <input type="text" disabled={true} />
-    </li>
-  </ul>
+	<ul style="list-style: none;">
+		<li className="item item2" onClick={() => alert('hi!')}>item 1</li>
+		<li style="background: red;">
+		    <input type="checkbox" checked={false} />
+		    <input type="text" onInput={log} />
+		</li>
+		{/* this node will always be updated */}
+		<li forceUpdate={true}>text</li>
+	</ul>
 );
+
 
 // $root.appendChild(createElement(f));
 
