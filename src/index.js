@@ -65,8 +65,10 @@ function updateElement($parent, newNode, oldNode, index = 0) {
 	 	// 新节点和老节点 发生变化，替换
 	 	$parent.replaceChild(createElement(newNode), $parent.childNodes[index]);
 	 } else if (newNode.type) {
+	 	// 更新属性
+	 	updateProps($parent.childNodes[index], newNode.props, oldNode.props);
 	 	// 遍历子节点 再比较更新
-	 	let newNodeLength = newNode.children.length,
+	 	const newNodeLength = newNode.children.length,
 	 		oldNodeLength = oldNode.children.length;
 
 	 	for (let i = 0; i < newNodeLength || i < oldNodeLength; i++){
@@ -91,11 +93,11 @@ function changed(node1, node2) {
 const $root = document.getElementById('root'),
       $reload = document.getElementById('reload');
 
-updateElement($root, a);
+// updateElement($root, a);
 
-$reload.addEventListener('click', () => {
-	updateElement($root, b, a)
-});
+// $reload.addEventListener('click', () => {
+// 	updateElement($root, b, a)
+// });
 
 
 
@@ -158,7 +160,13 @@ function setBooleanProp($target, name, value) {
 	}
 }
 
-
+/**
+ * [removeProp 移除属性]
+ * @param  {[type]} $target [description]
+ * @param  {[type]} name    [description]
+ * @param  {[type]} value   [description]
+ * @return {[type]}         [description]
+ */
 function removeProp($target, name, value) {
 	if (isCustomProp(name)) {
 		return;
@@ -177,6 +185,33 @@ function removeBooleanProp($target, name, value) {
 }
 
 
+/**
+ * [updateProp 更新属性]
+ * @param  {[type]} $target [description]
+ * @param  {[type]} name    [description]
+ * @param  {[type]} newVal  [description]
+ * @param  {[type]} oldVal  [description]
+ * @return {[type]}         [description]
+ */
+function updateProp($target, name, newVal, oldVal) {
+	if (!newVal) {
+		// 新节点 没有该属性值
+		removeProp($target, name, oldVal);
+	} else if (!oldVal || newVal !== oldVal) {
+		// 旧节点没有该属性 或者 两者不相等
+		setProp($target, name, newVal);
+	}
+}
+
+function updateProps($target, newProps, oldProps = {}) {
+	const props = Object.assign({}, newProps, oldProps);
+	Object.keys(props).forEach(name => {
+		if (name.slice(0, 2) !== '__') {
+			// 过滤__前缀属性
+			updateProp($target, name, newProps[name], oldProps[name]);
+		}
+	});
+}
 
 const f = (
 	<ul style="list-style: none;">
@@ -188,4 +223,20 @@ const f = (
 	</ul>
 );
 
-$root.appendChild(createElement(f));
+const g = (
+  <ul style="list-style: none;">
+    <li className="item item2">item 1</li>
+    <li style="background: red;">
+      <input type="checkbox" checked={false} />
+      <input type="text" disabled={true} />
+    </li>
+  </ul>
+);
+
+// $root.appendChild(createElement(f));
+
+
+updateElement($root, f);
+$reload.addEventListener('click', () => {
+	updateElement($root, g, f);
+});
