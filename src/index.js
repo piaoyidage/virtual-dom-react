@@ -159,6 +159,24 @@ function setBooleanProp($target, name, value) {
 }
 
 
+function removeProp($target, name, value) {
+	if (isCustomProp(name)) {
+		return;
+	} else if (name === 'className') {
+		$target.removeAttribute('class');
+	} else if (typeof value === 'boolean') {
+		removeBooleanProp($target, name, value);
+	} else {
+		$target.removeAttribute($target, name, value);
+	}
+}
+
+function removeBooleanProp($target, name, value) {
+	$target.removeAttribute(name);
+	$target[name] = false;
+}
+
+
 
 const f = (
 	<ul style="list-style: none;">
