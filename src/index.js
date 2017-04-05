@@ -8,14 +8,20 @@ function h(type, props, ...children) {
 }
 
 const a = (
-  <ul className="list">
-    <li>item 1</li>
-    <li>item 2</li>
-  </ul>
+	<ul className="list">
+		<li>item 1</li>
+		<li>item 2</li>
+	</ul>
+);
+
+const b = (
+	<ul className="list">
+    	<li>item 1</li>
+    	<li>hello</li>
+  	</ul>
 );
 
 console.log(a);
-console.log(typeof a);
 
 /**
  * [createElement 根据 virtual dom 创建真实 dom]
@@ -30,7 +36,7 @@ function createElement(node) {
 
 	// 非文本节点
 	let $el = document.createElement(node.type);
-	$el.children
+	node.children
 	   .map(createElement)
 	   .forEach($el.appendChild.bind($el));
 	return $el;
@@ -54,7 +60,7 @@ function updateElement($parent, newNode, oldNode, index = 0) {
 	 } else if (changed(newNode, oldNode)){
 	 	// 新节点和老节点 发生变化，替换
 	 	$parent.replaceChild(createElement(newNode), $parent.childNodes[index]);
-	 } else {
+	 } else if (newNode.type) {
 	 	// 遍历子节点 再比较更新
 	 	let newNodeLength = newNode.children.length,
 	 		oldNodeLength = oldNode.children.length;
@@ -74,9 +80,18 @@ function updateElement($parent, newNode, oldNode, index = 0) {
 function changed(node1, node2) {
 	return typeof node1 !== typeof node2 ||
 		   typeof node1 === 'string' && node1 !== node2 ||
-		   typeof node1.type !== node2.type;
+		   node1.type !== node2.type;
 }
 
+
+const $root = document.getElementById('root'),
+      $reload = document.getElementById('reload');
+
+updateElement($root, a);
+
+$reload.addEventListener('click', () => {
+	updateElement($root, b, a)
+});
 
 
 
