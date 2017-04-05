@@ -4,7 +4,7 @@
 
 /** @jsx h */
 function h(type, props, ...children) {
-  return { type, props, children };
+  return { type, props: props || {}, children };
 }
 
 const a = (
@@ -36,6 +36,10 @@ function createElement(node) {
 
 	// 非文本节点
 	let $el = document.createElement(node.type);
+
+	// 设置 属性
+	setProps($el, node.props);
+
 	node.children
 	   .map(createElement)
 	   .forEach($el.appendChild.bind($el));
@@ -92,3 +96,78 @@ updateElement($root, a);
 $reload.addEventListener('click', () => {
 	updateElement($root, b, a)
 });
+
+
+
+/**
+ * [setProps 设置属性]
+ * @param {[type]} $target [description]
+ * @param {[type]} props   [description]
+ */
+function setProps($target, props) {
+	Object.keys(props).forEach(name => {
+		// 过滤__ 前缀属性
+		if (name.slice(0, 2) !== '__'){
+			setProp($target, name, props[name]);
+		}
+	});
+}
+/**
+ * [setProp 设置属性]
+ * @param {[type]} $target [description]
+ * @param {[type]} name    [description]
+ * @param {[type]} value   [description]
+ */
+function setProp($target, name, value) {
+	if (isCustomProp(name)){
+		// 是否是自定义属性
+		return;
+	} else if (name === 'className') {
+		// 当前属性是 className 修正
+		$target.setAttribute('class', value);
+	} else if (typeof value === 'boolean') {
+		// 当前属性是 boolean 修正
+		setBooleanProp($target, name, value);
+	} else {
+		$target.setAttribute(name, value);
+	}
+}
+
+/**
+ * [isCustomProp 是否自定义属性 ]
+ * @param  {[type]}  name [description]
+ * @return {Boolean}      [description]
+ */
+function isCustomProp(name){
+	// TODO
+	return;
+}
+
+/**
+ * [setBooleanProp description]
+ * @param {[type]} $target [description]
+ * @param {[type]} name    [description]
+ * @param {[type]} value   [description]
+ */
+function setBooleanProp($target, name, value) {
+	if (value) {
+		$target.setAttribute(name, value);
+		$target[name] = true;
+	} else {
+		$target[name] = false;
+	}
+}
+
+
+
+const f = (
+	<ul style="list-style: none;">
+		<li className="item">item 1</li>
+		<li className="item">
+			<input type="checkbox" checked={true} />
+			<input type="text" disabled={false} />
+		</li>
+	</ul>
+);
+
+$root.appendChild(createElement(f));

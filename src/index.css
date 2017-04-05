@@ -3,3 +3,8 @@ body {
   padding: 0;
   font-family: sans-serif;
 }
+
+.item {
+  background: yellow;
+  margin: 10px 0;
+}
