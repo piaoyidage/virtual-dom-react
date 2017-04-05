@@ -40,6 +40,9 @@ function createElement(node) {
 	// 设置 属性
 	setProps($el, node.props);
 
+	// 添加事件
+	addEventListeners($el, node.props);
+
 	node.children
 	   .map(createElement)
 	   .forEach($el.appendChild.bind($el));
@@ -141,8 +144,7 @@ function setProp($target, name, value) {
  * @return {Boolean}      [description]
  */
 function isCustomProp(name){
-	// TODO
-	return;
+	isEventProp(name);
 }
 
 /**
@@ -230,6 +232,14 @@ function isEventProp(name) {
  */
 function extractEventName(name) {
 	return name.slice(2).toLowerCase();
+}
+
+function addEventListeners($target, props) {
+	Object.keys(props).forEach(name => {
+		if (isEventProp(name)) {
+			$target.addEventListener(extractEventName(name), props[name]);
+		}
+	});
 }
 
 const f = (
