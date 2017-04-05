@@ -92,11 +92,3 @@ updateElement($root, a);
 $reload.addEventListener('click', () => {
 	updateElement($root, b, a)
 });
-
-
-
-
-
-
-
-
