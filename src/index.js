@@ -213,6 +213,25 @@ function updateProps($target, newProps, oldProps = {}) {
 	});
 }
 
+/**
+ * [isEventProp 判断是否是事件属性]
+ * @param  {[type]}  name [description]
+ * @return {Boolean}      [description]
+ */
+function isEventProp(name) {
+	// 属性名以 on 为前缀
+	return /^on/.test(name);
+}
+
+/**
+ * [extractEventName 抽取事件名]
+ * @param  {[type]} name [description]
+ * @return {[type]}      [description]
+ */
+function extractEventName(name) {
+	return name.slice(2).toLowerCase();
+}
+
 const f = (
 	<ul style="list-style: none;">
 		<li className="item">item 1</li>
