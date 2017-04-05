@@ -1,14 +1,3 @@
-// import React from 'react';
-// import ReactDOM from 'react-dom';
-// import App from './App';
-// import './index.css';
-
-// ReactDOM.render(
-//   <App />,
-//   document.getElementById('root')
-// );
-
-
 /**
  * 自定义 jsx
  */
@@ -26,3 +15,22 @@ const a = (
 );
 
 console.log(a);
+
+/**
+ * [createElement 根据 virtual dom 创建真实 dom]
+ * @param  {[type]} node [virtual dom]
+ * @return {[type]}      [real dom]
+ */
+function createElement(node) {
+	if (typeof node === 'string') {
+		// 如果是文本节点
+		return document.createTextNode(node);
+	}
+
+	// 非文本节点
+	let $el = document.createElement(node.type);
+	$el.children
+	   .map(createElement)
+	   .forEach($el.appendChild.bind($el));
+	return $el;
+}
