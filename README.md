@@ -281,4 +281,186 @@ $reload.addEventListener('click', () => {
 
 
 
+### 比较属性
+
+比较属性，有三种情况
+
+```html
+<!-- new -->
+<li className="hello"></li>
+
+<!-- old -->
+<li></li>
+```
+
+```html
+<!-- new -->
+<li></li>
+
+<!-- old -->
+<li className="hello"></li>
+```
+
+```html
+<!-- new -->
+<li className="hello"></li>
+
+<!-- old -->
+<li className="world"></li>
+```
+
+上面三种情况，无非就是设置属性或者删除属性
+
+```js
+function updateProp($target, name, newValue, oldValue) {
+  if (!newValue) {
+    removeProp($target, name, oldValue);
+  } else if (!oldValue || newValue !== oldValue) {
+    setProp($target, name, newValue);
+  }
+}
+
+function updateProps($target, newProps, oldProps) {
+  const props = Object.assign({}, newProps, oldProps);
+  Object.keys(props)
+        .filter(name => {return !name.match(/^__*/);})
+        .forEach(name => {
+          updateProp($target, name, newProps[name], oldProps[name]);
+        });
+}
+
+```
+
+#### 设置属性
+
+##### 初步思路
+
+```js
+function setProp($target, name, value) {
+  $target.setAttribute(name, value);
+}
+
+function setProps($target, props) {
+  Object.keys(props).forEach(name => {
+    setProp($target, name, props[name]);
+  });
+}
+```
+
+##### 进一步优化
+
+```js
+function setProp($target, name, value) {
+  if (isCustomProp(name)) {
+    return;
+  } else if (name === "className") {
+    $target.setAttribute("class", value);
+  } else if (typeof value === "boolean") {
+    setBooleanProp($target, name, value);
+  } else {
+    $target.setAttribute(name, value);
+  }
+}
+
+function setProps($target, props) {
+  Object.keys(props).filter(name => {
+    return !name.match(/^__*/);
+  }).forEach(name => {
+    setProp($target, name, props[name]);
+  });
+}
+
+function setBooleanProp($target, name, value) {
+  if (value) {
+    $target.setAttribute(name, value);
+    $target[name] = true;
+  } else {
+    $target[name] = false;
+  }
+}
+
+function isCustomProp(name) {
+  return false;
+}
+```
+
+#### 删除属性
+
+```js
+function removeProp($target, name, value) {
+  if (isCustomProp(name)) {
+    return;
+  } else if (name === "className") {
+    $target.removeAttribute("class", value);
+  } else if (typeof value === "boolean") {
+    removeBooleanProp($target, name);
+  } else {
+    $target.removeAttribute(name);
+  }
+}
+
+function removeBooleanProp($target, name) {
+  $target.removeAttribute(name, value);
+  $target[name] = false;
+}
+```
+
+#### 添加到 updateElement
+
+```js
+function updateElement($parent, newNode, oldNode, index = 0) {
+  if (!oldNode) {
+    $parent.appendChild(createElement(newNode));
+  } else if (!newNode) {
+    $parent.removeChild($parent.childNodes[index]);
+  } else if (changed(newNode, oldNode)) {
+    $parent.replaceChild(createElement(newNode), $parent.childNodes[index]);
+  } else if (newNode.type) {
+
+    updateProps($parent.childNodes[index], newNode.props, oldNode.props);
+
+    const newNodeLength = newNode.children.length;
+    const oldNodeLength = oldNode.children.length;
+    for (let i = 0; i < newNodeLength || i < oldNodeLength; i++) {
+      updateElement($parent.childNodes[index], newNode.children[i], oldNode.children[i], i);
+    }
+  }
+}
+```
+
+### 测试
+
+```
+const f = (
+  <ul style="list-style: none;">
+    <li className="item">item 1</li>
+    <li className="item">
+      <input type="checkbox" checked={true} />
+      <input type="text" disabled={false} />
+    </li>
+  </ul>
+);
+
+const g = (
+  <ul style="list-style: none;">
+    <li className="item item2">item 1</li>
+    <li style="background: red;">
+      <input type="checkbox" checked={false} />
+      <input type="text" disabled={true} />
+    </li>
+  </ul>
+);
+
+const $root = document.getElementById('root');
+const $reload = document.getElementById('reload');
+
+updateElement($root, f);
+$reload.addEventListener('click', () => {
+  updateElement($root, g, f);
+});
+```
+
+
+
+
 
