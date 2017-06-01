@@ -460,7 +460,50 @@ $reload.addEventListener('click', () => {
 });
 ```
 
+## 事件
 
+```html
+<button onClick={() => alert('hello');}></button>
+```
 
+事件可以看作是一种特殊的属性
+
+```js
+function isEventProp(name) {
+  return /^on/.test(name);
+}
+
+function extractEventName(name) {
+  return name.slice(2).toLowerCase();
+}
+
+function addEventListeners($target, props) {
+  Object.keys(props).forEach( name => {
+    if (isEventProp(name)) {
+      $target.addEventListener(extractEventName(name), props[name]);
+    }
+  });
+}
+```
+
+#### 添加到 createElement
+
+```js
+function createElement(node) {
+  if (typeof node === 'string') {
+    return document.createTextNode(node);
+  }
+
+  let $el = document.createElement(node.type);
+
+  setProps($el, node.props);
+
+  addEventListeners($el, node.props);
+
+  node.children.map(createElement).forEach($el.appendChild.bind($el));
+
+  return $el;
+}
+```
 
 
